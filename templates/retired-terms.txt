@@ -1,0 +1,4 @@
+# Words this project has retired. CI fails if any comes back.
+# One per line: term | reason | date retired
+# Example:
+# old product name | renamed in the rebrand | 2026-01-01

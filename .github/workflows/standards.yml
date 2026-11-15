@@ -1,0 +1,106 @@
+# Shared CI for every project. A project calls it with templates/project-workflow.yml.
+# Order: cheapest checks first, so a failure costs the least time.
+# Every check is required. A project still adopting a check lists it in `allow-missing`,
+# and the run prints that list so the gap stays visible.
+name: standards
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: '24'
+      allow-missing:
+        description: 'Comma list of checks this project has not adopted yet, e.g. "typecheck,lint"'
+        type: string
+        default: ''
+      standards-ref:
+        description: 'Branch or tag of tek00b/build-standards to use'
+        type: string
+        default: 'main'
+    secrets:
+      STANDARDS_TOKEN:
+        description: 'Read-only token for tek00b/build-standards (fine-grained, Contents: read).'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  standards:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the project
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out the shared standards
+        uses: actions/checkout@v4
+        with:
+          repository: tek00b/build-standards
+          ref: ${{ inputs.standards-ref }}
+          path: .standards
+          token: ${{ secrets.STANDARDS_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Required scripts are present
+        env:
+          ALLOW_MISSING: ${{ inputs.allow-missing }}
+        run: |
+          node -e '
+            const pkg = require("./package.json");
+            const required = { format: "format:check", lint: "lint", typecheck: "typecheck", test: "test", build: "build" };
+            const allowed = new Set((process.env.ALLOW_MISSING || "").split(",").map(s => s.trim()).filter(Boolean));
+            const missing = Object.entries(required).filter(([name, script]) => !pkg.scripts?.[script] && !allowed.has(name));
+            if (allowed.size) console.log("Not adopted yet (allowed for now): " + [...allowed].join(", "));
+            if (missing.length) { console.error("Missing npm scripts: " + missing.map(([, s]) => s).join(", ")); process.exit(1); }
+          '
+
+      - name: Install exactly what the lockfile says
+        run: npm ci --ignore-scripts
+
+      - name: Format
+        if: ${{ !contains(inputs.allow-missing, 'format') }}
+        run: npm run format:check
+
+      - name: Lint
+        if: ${{ !contains(inputs.allow-missing, 'lint') }}
+        run: npm run lint
+
+      - name: Type check
+        if: ${{ !contains(inputs.allow-missing, 'typecheck') }}
+        run: npm run typecheck
+
+      - name: Tests
+        if: ${{ !contains(inputs.allow-missing, 'test') }}
+        run: npm test
+
+      - name: Build
+        if: ${{ !contains(inputs.allow-missing, 'build') }}
+        run: npm run build
+
+      - name: Retired terms, env example, duplicated docs
+        run: node .standards/checks/run-all.mjs .
+
+      - name: Duplicated code
+        if: ${{ !contains(inputs.allow-missing, 'duplicates') }}
+        run: npx --yes jscpd@4 --min-tokens 70 --threshold 0 --gitignore --ignore "**/node_modules/**,**/dist/**,.standards/**,**/*.md" .
+
+      - name: Secret scan
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.28.0 \
+            detect --source /repo --redact --no-banner --exit-code 1
+
+      - name: Security scan
+        if: ${{ !contains(inputs.allow-missing, 'security') }}
+        run: |
+          docker run --rm -v "$PWD:/src" semgrep/semgrep:latest \
+            semgrep scan --config p/default --error --metrics=off --exclude .standards
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high

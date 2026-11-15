@@ -1,0 +1,27 @@
+{
+  "accounts": {
+    "stripe": {
+      "env": "STRIPE_SECRET_KEY",
+      "accountId": "<the acct_ id this project must use>"
+    },
+    "supabase": {
+      "urlEnv": "SUPABASE_URL",
+      "keyEnvs": ["SUPABASE_SECRET_KEY"],
+      "projectRef": "<the project ref this project must use>"
+    },
+    "resend": {
+      "env": "RESEND_API_KEY",
+      "domain": "<the sending domain this project must use>"
+    }
+  },
+  "retiredTerms": {
+    "ignore": ["docs/history/"]
+  },
+  "envExample": {
+    "ignore": [],
+    "platformVariables": []
+  },
+  "docDuplicates": {
+    "ignore": []
+  }
+}

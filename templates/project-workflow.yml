@@ -1,0 +1,14 @@
+# Copy to .github/workflows/standards.yml in a project. This is the whole file.
+name: standards
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  standards:
+    uses: tek00b/build-standards/.github/workflows/standards.yml@main
+    with:
+      # Checks this project has not adopted yet. Shrink this list every release.
+      allow-missing: ''
+    secrets: inherit

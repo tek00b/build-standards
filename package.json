@@ -1,0 +1,13 @@
+{
+  "name": "build-standards",
+  "private": true,
+  "type": "module",
+  "description": "Shared build standards: CI workflow and checks for all projects",
+  "scripts": {
+    "test": "node --test test/checks.test.mjs",
+    "check": "node checks/run-all.mjs ."
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,3 @@
+# Words this repo has retired. CI fails if any comes back.
+# term | reason | date retired
+# (none yet)

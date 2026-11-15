@@ -1,0 +1,26 @@
+# Tests the shared checks themselves, and holds this repo to its own rules.
+name: self-test
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check tests
+        run: npm test
+      - name: Retired terms, env example, duplicated docs
+        run: node checks/run-all.mjs .
+      - name: Secret scan
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.28.0 \
+            detect --source /repo --redact --no-banner --exit-code 1

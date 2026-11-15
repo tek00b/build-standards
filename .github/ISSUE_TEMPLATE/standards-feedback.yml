@@ -1,0 +1,65 @@
+name: Standards feedback
+description: Suggest a change to a rule, check or guide
+title: "[Feedback] "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reading. One issue per point keeps each one easy to act on.
+        Rules are numbered in standards/core-rules.md (R01 to R35). Decisions are D01 to D13.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - A core rule (R##)
+        - A decision (D##)
+        - A CI check or the workflow
+        - Data design
+        - Interface
+        - Security
+        - Review and agents
+        - Something missing
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: reference
+    attributes:
+      label: Rule, decision or file
+      placeholder: "R20, D10, standards/judgment/data-design.md"
+  - type: dropdown
+    id: suggestion
+    attributes:
+      label: What you suggest
+      options:
+        - Keep, but reword
+        - Change it
+        - Remove it
+        - Add something new
+        - Question, not a suggestion
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What to change and why. A real example, link or incident helps most.
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: How much it matters
+      options:
+        - Would cause real harm (security, money, data loss)
+        - Would make the code noticeably worse
+        - Nice to have
+    validations:
+      required: true
+  - type: input
+    id: role
+    attributes:
+      label: Your lens
+      placeholder: "Backend engineer, game developer, product, business"

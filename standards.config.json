@@ -1,0 +1,5 @@
+{
+  "envExample": {
+    "ignore": ["test/"]
+  }
+}
