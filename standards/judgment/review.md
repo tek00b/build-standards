@@ -52,6 +52,7 @@ Verdict: PASS, PASS WITH FIXES (fixes made and checked), or BLOCK. BLOCK on any 
 - Helpers do not write files; the main session saves after every chunk (R12).
 - Every log line records the model that actually ran .
 - One coordination file per project names lanes, write rules, the approval list and the model table. Nothing else restates them.
+- Lanes are the files each owns and the tasks it runs; persona names appear only where a task prompt uses them.
 
 ## What was overkill (from the handoffs, `guess`)
 
