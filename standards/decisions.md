@@ -2,6 +2,12 @@
 
 the owner's calls on the Build Standards project. A decision is only a decision when the owner makes it. Newest first. Each line: date, decision, reason.
 
+## 2026-11-23
+
+| # | Decision | Why |
+|---|---|---|
+| D20 | No agent starts without the brief preflight: inputs listed as file paths, each one checked, and the stop rule in the brief (`checks/agent-brief.mjs`, `templates/agent-brief.md`). Build specs are committed to `docs/specs/` when a build starts. Applies in every project. (R12) | R12 already said key docs go to subagents inline, but it lived only in prose and was skipped: a builder stopped mid-run and the restart cost credits. R07 says a prose rule gets a check. |
+
 ## 2026-11-15
 
 | # | Decision | Why |

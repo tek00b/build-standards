@@ -10,6 +10,7 @@ import { findEnvExampleProblems } from '../checks/env-example.mjs';
 import { findDocDuplicates } from '../checks/doc-duplicates.mjs';
 import { findKeyAccountProblems } from '../checks/key-account.mjs';
 import { findStyleProblemsInText } from '../checks/writing-style.mjs';
+import { findBriefProblems, parseBriefInputs } from '../checks/agent-brief.mjs';
 
 test('writing style: flags em dashes and "it\'s not X, it\'s Y", allows plain contrast', () => {
   const text = [
@@ -112,4 +113,24 @@ test('key account: Supabase URL for the wrong project fails before any network c
   const findings = await findKeyAccountProblems(rootDir, { SUPABASE_URL: 'https://otherprojectref00000.supabase.co' });
   assert.equal(findings.length, 1);
   assert.match(findings[0], /expected expectedprojectref000/);
+});
+
+test('agent brief: passes when every input exists and the stop rule is there', () => {
+  const brief = '# Brief\n\n## Inputs\n- `docs/specs/a.md` : the spec\n- /abs/b.md\n\n## Stop rule\nThe agent stops and reports.\n';
+  assert.deepEqual(parseBriefInputs(brief), ['docs/specs/a.md', '/abs/b.md']);
+  const opened = [];
+  const problems = findBriefProblems(brief, { baseDir: '/repo', fileExists: (path) => { opened.push(path); return true; } });
+  assert.deepEqual(problems, []);
+  assert.deepEqual(opened, ['/repo/docs/specs/a.md', '/abs/b.md']);
+});
+
+test('agent brief: flags a missing input, a missing Inputs section, an empty one and a missing stop rule', () => {
+  const missing = findBriefProblems('## Inputs\n- docs/specs/gone.md\n\nThe agent stops and reports.\n', { baseDir: '/repo', fileExists: () => false });
+  assert.equal(missing.length, 1);
+  assert.match(missing[0], /docs\/specs\/gone\.md/);
+  assert.match(findBriefProblems('Just build it. Stop and report if stuck.', { fileExists: () => true })[0], /No "## Inputs" section/);
+  assert.match(findBriefProblems('## Inputs\n\n## Job\nStop and report.', { fileExists: () => true })[0], /is empty/);
+  const noStop = findBriefProblems('## Inputs\n- none\n', { fileExists: () => false });
+  assert.equal(noStop.length, 1);
+  assert.match(noStop[0], /No stop rule/);
 });
