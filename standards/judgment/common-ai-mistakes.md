@@ -27,8 +27,11 @@ Merged on 2026-11-15 from the coder and code-reviewer skills, which each held a 
 | 19 | Docs and comments that describe the old behavior | Update them in the same change | Diff the docs against the change |
 | 20 | Saying it works without running it | Run it and show the output (R05) | Ask for the receipt |
 | 21 | Security getting worse across repeated edits | Rerun the security scan after every round, not only at the end | On a later round, compare scans before and after and re-read earlier fixes |
+| 22 | Detecting a state from a stand-in number that other things also move (run speed for a buff, a timer for a phase, a price for a plan) | Read the state itself: the buff and its stack count, the event the platform fires, the record that holds it. Use a stand-in only when nothing direct exists, and say so in a comment | For each trigger, ask what else changes the number it reads; one other cause is a bug |
 
 ## Evidence notes
+
+- #22 comes from a real miss (Parsley, WoW: Forever add-on, Nov 26, 2026): a Tauren "choo-choo" meant to fire at full Plainsrunning speed read run speed instead. Full Plainsrunning (+30%) never reached the speed line, and potions, a hunter's Aspect of the Pack and mounts crossed it without Plainsrunning. Fixed in 0.0.32 by reading the buff's stack count. Spotted by the product owner, not by review. Tag: `obs`, one case.
 
 Most are vendor reports with small samples; the two papers are peer-reviewed. Use them to decide where to look, not as proof. Tags: `doc` (reported, not re-checked).
 
