@@ -64,6 +64,24 @@ Why: a feed, a notification and a monthly report all ask "what happened," and ev
 
 Primary key, real foreign keys with a chosen on-delete rule, not null and check constraints, created_at, a `comment on table`, and indexes that follow the queries. A field you filter or count on gets its own column, never a key inside JSON.
 
+## 6. Scale-ready checklist (Bobby, Nov 28, 2026: plan for accidental viral success)
+
+Every spec answers these before the build starts. Lock the one-way doors now; everything else waits for a number.
+
+**One-way doors, decided at the start:**
+1. Identity: a stable ID from the source system, never a name or label, is the key. Merge nothing across IDs.
+2. Versions: every stored row records the writer's version; every reader records its own. Old formats stay readable.
+3. Raw input kept in private storage, so data can be read again after a model change.
+4. Schema changes only through numbered migrations that are never edited after they run.
+5. Event tables carry `occurred_at` with an index from the first migration, so they can be split by time later.
+6. Every store a client writes (a save file, local storage, a queue) names its cap: the most rows or bytes it can reach, or how old rows roll up. A check fails on a store with no cap.
+7. Tuning numbers live in one versioned table or file, never scattered in code.
+8. Every public intake (uploads, sign-ups, AI calls) has a per-user rate limit, a size limit and a spend alert before it opens (R21).
+
+**Later, behind tripwires:** compression, caching, read replicas, splitting tables, columnar stores. Each gets a tripwire (a number and where it is read) in the project's scale plan, and a scheduled check reports any that trip. A number nobody can read yet is reported as unknown, never as fine.
+
+Source: Parsley scale-ready plan (tek00b/wow-forever-tool docs/specs/scale-ready.md), Nov 28, 2026.
+
 ## Worked example: the first pilot app follow-and-notify slice
 
 1. Ana follows Ben: insert `events(actor=Ana, verb='followed', object=Ben)` and `follows(follower=Ana, followee=Ben, state='active')` in one transaction.
